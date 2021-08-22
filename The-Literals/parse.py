@@ -166,9 +166,12 @@ class Parser:
 
     def parse_arguments(self):
         token, value = self.peek_lexeme()
-        while token == Token.WITH:
+        if token == Token.WITH:
             self.parse_argument()
             token, value = self.peek_lexeme()
+            while token == Token.AND:
+                self.parse_argument()
+                token, value = self.peek_lexeme()
 
     def parse_argument(self):
         self.advance()
@@ -176,18 +179,13 @@ class Parser:
         if token == Token.IDENTIFIER_WORD:
             self.parse_identifier()
         else:
-            raise UnexpectedTokenError(
-                Token.IDENTIFIER_WORD, token
-            )
-        
+            raise UnexpectedTokenError(Token.IDENTIFIER_WORD, token)
+
         token, value = self.peek_lexeme()
         if token != Token.AS:
-            raise UnexpectedTokenError(
-                Token.AS, token
-            )
+            raise UnexpectedTokenError(Token.AS, token)
         self.advance()
         self.parse_expr()
-
 
     def parse_reverse_assignment(self):
         self.advance()
@@ -195,9 +193,7 @@ class Parser:
         if token == Token.IDENTIFIER_WORD:
             self.parse_identifier()
         else:
-            raise UnexpectedTokenError(
-                Token.IDENTIFIER_WORD, token
-            )
+            raise UnexpectedTokenError(Token.IDENTIFIER_WORD, token)
 
     def parse_expr(self):
         self.parse_operand()
@@ -398,7 +394,7 @@ if __name__ == "__main__":
         yield (Token.IDENTIFIER_WORD, "parameter")
         yield (Token.AS, "as")
         yield (Token.NUMBER, 2)
-        yield (Token.WITH, "with")
+        yield (Token.AND, "and")
         yield (Token.IDENTIFIER_WORD, "the")
         yield (Token.IDENTIFIER_WORD, "second")
         yield (Token.IDENTIFIER_WORD, "parameter")
@@ -470,10 +466,10 @@ if __name__ == "__main__":
     parser = Parser(program(function_call_with_params_and_result))
     parser.parse()
 
-    # input_file = "samples/fib.comment"
-    # with open(input_file, "r") as f:
-    #     text = f.read()
+    input_file = "samples/fib.comment"
+    with open(input_file, "r") as f:
+        text = f.read()
 
-    # tokeniser = Tokeniser(text)
-    # parser = Parser(tokeniser.tokenise().__next__)
-    # parser.parse()
+    tokeniser = Tokeniser(text)
+    parser = Parser(tokeniser.tokenise().__next__)
+    parser.parse()
